@@ -27,15 +27,25 @@ function App() {
   useEffect(() => {
     const savedToken = localStorage.getItem('aeronet_token')
     if (savedToken) {
-      const decoded = decodeJWT(savedToken)
-      if (decoded.account_number) {
-        setIsLoggedIn(true)
-        // Rebuilding dummy user data so the dashboard doesn't crash
-        setUserData({ 
-          account_number: decoded.account_number, 
-          bill_amount: 'System Cached' 
-        })
-      }
+      fetch('http://localhost:5000/api/verify', {
+        headers: { 'Authorization': `Bearer ${savedToken}` }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.valid) {
+          const decoded = decodeJWT(savedToken)
+          setIsLoggedIn(true)
+          setUserData({ account_number: decoded.account_number, bill_amount: 'System Cached' })
+        } else {
+          localStorage.removeItem('aeronet_token')
+          setToken('')
+          setIsLoggedIn(false)
+          setErrorMsg("Session invalid or tampered with. Please log in again.")
+        }
+      })
+      .catch(() => {
+        setErrorMsg("Failed to verify session with server.")
+      })
     }
   }, [])
 
