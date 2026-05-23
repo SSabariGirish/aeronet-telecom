@@ -79,7 +79,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Sending the JWT!
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ url: pingUrl })
       })
@@ -124,10 +124,7 @@ function App() {
       <main>
         <h2>Welcome back, {userData.account_number}!</h2>
         <p><strong>Your Current Role:</strong> {decodedToken.role || 'customer'}</p>
-        <p><strong>Your Current Token:</strong></p>
-        <textarea readOnly value={token} style={{width: '100%', height: '60px', marginBottom: '20px'}} />
-
-        {/* 🚨 THE HIDDEN ADMIN PANEL 🚨 */}
+        
         {decodedToken.role === 'admin' ? (
           <div className="card" style={{borderColor: 'red', borderWidth: '2px', borderStyle: 'solid'}}>
             <h3 style={{color: 'red'}}>Admin Diagnostic Tool</h3>
