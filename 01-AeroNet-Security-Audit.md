@@ -61,7 +61,7 @@ An attacker can leverage broken JSON Web Token (JWT) authentication to bypass ac
 
 ### ### APP-003: UI Spoofing (Unverified Client-Side State)
 * **Description:** The React frontend relies solely on the unverified payload of a JWT stored in `localStorage` to render sensitive administrative UI components.
-* **Impact:** An attacker can modify the token payload in their browser to trick the frontend into displaying the Admin Diagnostic Tool, constituting a failure in Defense in Depth.
+* **Impact:** An attacker can modify the token payload in their browser to trick the frontend into displaying the Admin Diagnostic Tool, constituting a failure in Defence in Depth.
 * **Remediation:** 1. Implement a backend `/api/verify` endpoint.
   2. Require the React frontend to cryptographically validate the session token with the server upon page load before rendering administrative components.
 
