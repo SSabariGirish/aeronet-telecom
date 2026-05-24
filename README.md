@@ -1,6 +1,6 @@
-# 🌐 AeroNet Telecom: DevSecOps & AppSec Portfolio Project
+# AeroNet Telecom: DevSecOps & AppSec Portfolio Project
 
-![Docker](https://img.shields.io/badge/Docker-Containerized-blue?logo=docker)
+![Docker](https://img.shields.io/badge/Docker-Containerised-blue?logo=docker)
 ![React](https://img.shields.io/badge/Frontend-React.js-61DAFB?logo=react&logoColor=black)
 ![Python](https://img.shields.io/badge/Backend-Python%20Flask-3776AB?logo=python&logoColor=white)
 ![MySQL](https://img.shields.io/badge/Database-MySQL%208.0-4479A1?logo=mysql&logoColor=white)
