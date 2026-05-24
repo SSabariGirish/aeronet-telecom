@@ -6,9 +6,10 @@ import requests
 import datetime
 import os
 import urllib.parse
+import bcrypt
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:8080"])
 
 JWT_SECRET = os.environ.get("JWT_SECRET")
 if not JWT_SECRET:
@@ -32,21 +33,23 @@ def login():
     account_number = data.get('account_number')
     password = data.get('password')
     
-    query = "SELECT * FROM customers WHERE account_number = %s AND password_hash = %s"
+    query = "SELECT * FROM customers WHERE account_number = %s"
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
     try:
-        cursor.execute(query, (account_number, password))
+        cursor.execute(query, (account_number,))
         user = cursor.fetchone() 
         
-        if user:
+        if user and bcrypt.checkpw(password.encode('utf-8'), user["password_hash"].encode('utf-8')):
             token_payload = {
                 "account_number": user["account_number"],
                 "role": "customer",
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
             }
             token = jwt.encode(token_payload, JWT_SECRET, algorithm="HS256")
+            
+            del user["password_hash"]
             
             return jsonify({"success": True, "token": token, "data": user})
         else:
@@ -61,7 +64,11 @@ def verify_session():
     if not auth_header:
         return jsonify({"valid": False}), 401
     
-    token = auth_header.split(" ")
+    parts = auth_header.split(" ")
+    if len(parts) != 2 or parts.lower() != "bearer":
+        return jsonify({"success": False, "message": "Invalid header format"}), 401
+    
+    token = parts
     
     try:
         jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
@@ -97,7 +104,11 @@ def system_ping():
         if hostname not in ALLOWED_DOMAINS:
             return jsonify({"success": False, "message": "Security Violation: Target domain is not whitelisted."}), 403
         
-        response = requests.get(target_url, timeout=3)
+        response = requests.get(target_url, timeout=3, allow_redirects=False)
+
+        if response.status_code in (301, 302, 303, 307, 308):
+            return jsonify({"success": False, "message": "Security Violation: Redirects are not permitted."}), 403
+
         return jsonify({
             "success": True, 
             "message": "Ping successful", 
